@@ -7,7 +7,16 @@ const schema = z.object({
   password: z.string().min(8),
 })
 
-export default async function login(formData: FormData) {
+type State = {
+  message: string;
+  error?: {
+    email?: string;
+    password?: string;
+  };
+  success?: boolean;
+}
+
+export default async function login(prevState: State, formData: FormData): Promise<State> {
   const validatedFields = schema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -15,37 +24,40 @@ export default async function login(formData: FormData) {
 
   if (!validatedFields.success) {
     return {
-      error: validatedFields.error.flatten().fieldErrors,
+      message: "Invalid input",
+      error: {
+        email: validatedFields.error.flatten().fieldErrors.email?.[0],
+        password: validatedFields.error.flatten().fieldErrors.password?.[0],
+      }
     };
   }
 
   const { email, password } = validatedFields.data;
 
-  const errors = {
-    email: "",
-    password: "",
-  }
-
   // dummy error case
   if (email === "test@test.com") {
-    errors.email = "Invalid email";
+    return {
+      message: "Invalid credentials",
+      error: {
+        email: "Invalid email",
+      }
+    };
   }
 
   if (password === "password") {
-    errors.password = "Invalid password";
+    return {
+      message: "Invalid credentials",
+      error: {
+        password: "Invalid password",
+      }
+    };
   }
 
   // dummy waiting time
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  if (Object.values(errors).some(Boolean)) {
-    return {
-      error: errors,
-    };
-  }
-
-  // dummy login
   return {
+    message: "Success! Redirecting...",
     success: true,
   };
 }
