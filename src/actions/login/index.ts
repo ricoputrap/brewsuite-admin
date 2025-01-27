@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from 'next/navigation';
 import { z } from 'zod'
  
 const schema = z.object({
@@ -16,7 +17,7 @@ type State = {
   success?: boolean;
 }
 
-export default async function login(prevState: State, formData: FormData): Promise<State> {
+export default async function login(_: State, formData: FormData): Promise<State> {
   const validatedFields = schema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -56,8 +57,6 @@ export default async function login(prevState: State, formData: FormData): Promi
   // dummy waiting time
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  return {
-    message: "Success! Redirecting...",
-    success: true,
-  };
+  // redirect to home page
+  redirect("/dashboard");
 }
